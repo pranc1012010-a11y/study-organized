@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>منظم الدراسة</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4CAF50">
+
+<style>
+body {
+  font-family: Arial;
+  direction: rtl;
+  text-align: center;
+  background: #f0f4f8;
+}
+
+.container {
+  width: 90%;
+  max-width: 500px;
+  margin: auto;
+}
+
+input, button {
+  padding: 10px;
+  margin: 5px;
+  width: 80%;
+}
+
+.task {
+  background: white;
+  padding: 10px;
+  margin: 5px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+button {
+  cursor: pointer;
+  background: #4CAF50;
+  color: white;
+  border: none;
+}
+
+.timer {
+  font-size: 30px;
+  margin: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>📚 منظم وقت الدراسة</h1>
+
+<div class="container">
+
+<input type="text" id="taskInput" placeholder="اكتب المهمة">
+<button onclick="addTask()">إضافة</button>
+
+<div id="tasks"></div>
+
+<h2>⏳ مؤقت المذاكرة</h2>
+<div class="timer" id="timer">25:00</div>
+<button onclick="startTimer()">ابدأ</button>
+<button onclick="resetTimer()">إعادة</button>
+
+</div>
+
+<script>
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+function renderTasks() {
+  let container = document.getElementById("tasks");
+  container.innerHTML = "";
+  tasks.forEach((task, index) => {
+    container.innerHTML += `
+      <div class="task">
+        ${task}
+        <button onclick="deleteTask(${index})">❌</button>
+      </div>
+    `;
+  });
+}
+
+function addTask() {
+  let input = document.getElementById("taskInput");
+  if(input.value !== "") {
+    tasks.push(input.value);
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    input.value = "";
+    renderTasks();
+  }
+}
+
+function deleteTask(index) {
+  tasks.splice(index, 1);
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+  renderTasks();
+}
+
+renderTasks();
+
+// timer
+let time = 1500;
+let interval;
+
+function startTimer() {
+  clearInterval(interval);
+  interval = setInterval(() => {
+    if(time > 0) {
+      time--;
+      let minutes = Math.floor(time / 60);
+      let seconds = time % 60;
+      document.getElementById("timer").innerText =
+        `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+    }
+  }, 1000);
+}
+
+function resetTimer() {
+  clearInterval(interval);
+  time = 1500;
+  document.getElementById("timer").innerText = "25:00";
+}
+
+// service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+</script>
+
+</body>
+</html>
